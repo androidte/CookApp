@@ -1,0 +1,72 @@
+<LinearLayout
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#CC0000"
+        android:text="@string/apptitle"
+        android:textSize="22sp"
+        android:gravity="center"
+        android:textColor="#FFFFFF"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:background="#FF4444">
+
+        <EditText
+            android:id="@+id/search_input"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="#FFFFFF"
+            android:layout_margin="20dp"
+            android:layout_centerInParent="true"
+            android:singleLine="true"
+            android:paddingLeft="32dp"
+            android:paddingRight="32dp"
+            android:textSize="16sp"
+            />
+
+        <ImageView
+            android:id="@+id/clear_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/clear"
+            android:background="#FFFFFF"
+            android:layout_centerInParent="true"
+            android:layout_alignLeft="@id/search_input"/>
+
+        <ImageView
+            android:id="@+id/search_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/search"
+            android:layout_centerInParent="true"
+            android:layout_alignRight="@id/search_input"
+            android:background="#FFFFFF"/>
+        </RelativeLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#404065">
+        <GridView
+            android:id="@+id/main_grid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
+            android:gravity="center_horizontal"
+            android:numColumns="3"
+            android:scrollbars="none"
+            android:verticalSpacing="10dp"
+            android:horizontalSpacing="10dp"
+            >
+
+            </GridView>
+        </LinearLayout>
+    </LinearLayout>
