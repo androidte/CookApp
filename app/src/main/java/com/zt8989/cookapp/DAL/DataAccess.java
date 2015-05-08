@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 import com.zt8989.cookapp.Model.CookClass;
+import com.zt8989.cookapp.R;
+
 /**
  * Created by Administrator on 2015/4/21.
  */
@@ -20,20 +22,20 @@ public class DataAccess{
 * */
     public static List<CookClass> getCookClassList() {
         List<CookClass> list = Lists.newArrayList();
-        list.add(new CookClass(1,0,"美容养颜"));
-        list.add(new CookClass(2,0, "减肥瘦身"));
-        list.add(new CookClass(3,0, "保健养生"));
-        list.add(new CookClass(4,0, "适宜人群"));
-        list.add(new CookClass(5,0, "餐食时节"));
-        list.add(new CookClass(6,0, "孕产哺乳"));
-        list.add(new CookClass(7,0, "女性养生"));
-        list.add(new CookClass(8,0, "男性养生"));
-        list.add(new CookClass(9,0, "心脏血管"));
-        list.add(new CookClass(10,0, "皮肤器官"));
-        list.add(new CookClass(11,0, "肠胃消化"));
-        list.add(new CookClass(12,0,"口腔呼吸"));
-        list.add(new CookClass(13,0, "肌肉神经"));
-        list.add(new CookClass(14,0, "癌症其他"));
+        list.add(new CookClass(1,0,"美容养颜", R.drawable.item1));
+        list.add(new CookClass(2,0, "减肥瘦身",R.drawable.item2));
+        list.add(new CookClass(3,0, "保健养生",R.drawable.item3));
+        list.add(new CookClass(4,0, "适宜人群",R.drawable.item4));
+        list.add(new CookClass(5,0, "餐食时节",R.drawable.item5));
+        list.add(new CookClass(6,0, "孕产哺乳",R.drawable.item6));
+        list.add(new CookClass(7,0, "女性养生",R.drawable.item7));
+        list.add(new CookClass(8,0, "男性养生",R.drawable.item8));
+        list.add(new CookClass(9,0, "心脏血管",R.drawable.item9));
+        list.add(new CookClass(10,0, "皮肤器官",R.drawable.item10));
+        list.add(new CookClass(11,0, "肠胃消化",R.drawable.item11));
+        list.add(new CookClass(12,0,"口腔呼吸",R.drawable.item12));
+        list.add(new CookClass(13,0, "肌肉神经",R.drawable.item13));
+        list.add(new CookClass(14,0, "癌症其他",R.drawable.item14));
         return list;
     }
 

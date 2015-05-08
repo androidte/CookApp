@@ -3,6 +3,7 @@
     package="com.zt8989.cookapp" >
 
     <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="22" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -17,6 +18,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SubListActivity">
+
+        </activity>
+        <activity android:name=".CookListActivity"></activity>
+        <activity android:name=".CookDetailActivity"></activity>
     </application>
 
 </manifest>

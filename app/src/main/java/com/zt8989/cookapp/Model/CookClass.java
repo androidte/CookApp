@@ -4,9 +4,10 @@ package com.zt8989.cookapp.Model;
  * Created by Administrator on 2015/4/21.
  */
 public class CookClass {
-    private long id;
+    private long id; /**/
     private long cookclass;
     private String name;
+    private int imageId;
 
     public long getCookclass() {
         return cookclass;
@@ -20,10 +21,15 @@ public class CookClass {
         return name;
     }
 
-    public CookClass(long id, long cookclass, String name) {
+    public int getImageId() {
+        return imageId;
+    }
+
+    public CookClass(long id, long cookclass, String name,int imageId) {
         this.id = id;
         this.cookclass = cookclass;
         this.name = name;
+        this.imageId = imageId;
     }
 
     @Override
