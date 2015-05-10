@@ -1,30 +1,28 @@
 package com.zt8989.cookapp;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Html;
-import android.util.Log;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 import android.view.Window;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.loopj.android.http.JsonHttpResponseHandler;
-import com.zt8989.cookapp.Model.CookDetail;
-import com.zt8989.cookapp.Utils.HttpUtils;
-import com.zt8989.cookapp.Utils.JSONHelper;
-import com.zt8989.cookapp.Utils.TitleLayout;
+import com.zt8989.cookapp.DAL.CookDetailAdapter;
+import com.zt8989.cookapp.Model.CookItem;
 
-import org.apache.http.Header;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.List;
 
 /**
  * Created by Administrator on 2015/5/7.
  */
-public class CookDetailActivity extends Activity {
+public class CookDetailActivity extends FragmentActivity{
     private TitleLayout titleLayout;
-    private TextView contentView;
+    private ViewPager viewPager;
+    private CookDetailAdapter adapter;
+    private List<CookItem> cookItemList;
+
+    //private TextView contentView;
+    //private ImageView cookImg;
 
     /**
      * Called when the activity is starting.  This is where most initialization
@@ -52,45 +50,42 @@ public class CookDetailActivity extends Activity {
      * @see #onPostCreate
      */
     @Override
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.cook_detail_layout);
 
         titleLayout = (TitleLayout) findViewById(R.id.detail_title);
-        contentView = (TextView) findViewById(R.id.detail_content);
+        viewPager = (ViewPager) findViewById(R.id.view_pager);
         Intent intent = getIntent();
-        titleLayout.setText(intent.getStringExtra("title"));
+        Bundle args = intent.getExtras();
+        int position= args.getInt("position");
+        cookItemList = (List<CookItem>) args.getSerializable("List");
+        updateTitle(cookItemList.get(position).getName());
+
         titleLayout.setBackgroundColor(0xFF0099CC);
-        getCookDetail(intent.getLongExtra("classId",1));
+        updateViewPager(position);
+        //getCookDetail(intent.getLongExtra("classId",1));
     }
 
-    private void getCookDetail(long id) {
-        HttpUtils.get("show?id=" + id, null, new JsonHttpResponseHandler(){
-            /**
-             * Returns when request succeeds
-             *
-             * @param statusCode http response status line
-             * @param headers    response headers if any
-             * @param response   parsed response if any
-             */
+    private void updateViewPager(int position) {
+        adapter = new CookDetailAdapter(getSupportFragmentManager());
+        adapter.addAll(cookItemList);
+        viewPager.setAdapter(adapter);
+        viewPager.setCurrentItem(position);
+        viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener(){
             @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                try {
-                    if (response.getBoolean("success")) {
-                        JSONObject object = response.getJSONObject("yi18");
-                        CookDetail cookDetail = JSONHelper.getCookDetailFromJson(object, null);
-                        updateContentView(cookDetail);
-                    }
-
-                } catch (JSONException e) {
-                    Toast.makeText(CookDetailActivity.this,"get detail error",Toast.LENGTH_SHORT).show();
-                }
+            public void onPageSelected(int position) {
+                Fragment fragment = adapter.getItem(position);
+                Bundle args=fragment.getArguments();
+                CookItem item = (CookItem) args.getSerializable(CookDetailFragment.ARG_COOK_ITEM);
+                updateTitle(item.getName());
             }
         });
     }
 
-    private void updateContentView(CookDetail cookDetail) {
-        contentView.setText(Html.fromHtml(cookDetail.getMessage()));
+    public void updateTitle(String title) {
+        titleLayout.setText(title);
     }
 }

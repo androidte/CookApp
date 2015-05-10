@@ -1,9 +1,15 @@
 package com.zt8989.cookapp.Model;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+
+import java.io.Serializable;
+import java.util.List;
+
 /**
  * Created by Administrator on 2015/5/7.
  */
-public class CookItem {
+public class CookItem implements Serializable{
     private long id;
     private String name;
     private String tag;
@@ -77,5 +83,14 @@ public class CookItem {
     @Override
     public String toString() {
         return getName();
+    }
+
+    public static List<Long> getIdList(List<CookItem> cookItemList) {
+        return Lists.transform(cookItemList, new Function<CookItem, Long>() {
+            @Override
+            public Long apply(CookItem input) {
+                return input.getId();
+            }
+        });
     }
 }

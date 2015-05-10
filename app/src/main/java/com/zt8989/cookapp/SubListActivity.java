@@ -2,9 +2,7 @@ package com.zt8989.cookapp;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Shader;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -13,12 +11,10 @@ import android.widget.Toast;
 
 import com.joanzapata.android.BaseAdapterHelper;
 import com.joanzapata.android.QuickAdapter;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.zt8989.cookapp.Model.CookClass;
 import com.zt8989.cookapp.Utils.HttpUtils;
 import com.zt8989.cookapp.Utils.JSONHelper;
-import com.zt8989.cookapp.Utils.TitleLayout;
 
 import org.apache.http.Header;
 import org.json.JSONArray;

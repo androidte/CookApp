@@ -3,37 +3,32 @@ package com.zt8989.cookapp;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Message;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.common.collect.Lists;
 import com.joanzapata.android.BaseAdapterHelper;
 import com.joanzapata.android.QuickAdapter;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.zt8989.cookapp.Model.CookClass;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 import com.zt8989.cookapp.Model.CookItem;
 import com.zt8989.cookapp.Utils.HttpUtils;
 import com.zt8989.cookapp.Utils.JSONHelper;
-import com.zt8989.cookapp.Utils.TitleLayout;
 
 import org.apache.http.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 
 /**
  * Created by Administrator on 2015/5/7.
@@ -46,6 +41,7 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
     private TitleLayout titleLayout;
     private ListView cookItemListView;
     private List<CookItem> cookItemList;
+    private QuickAdapter<CookItem> adapter;
 
     /**
      * Called when the activity is starting.  This is where most initialization
@@ -85,6 +81,20 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
         titleLayout.setBackgroundColor(0xFF669900);
         cookItemListView.setOnItemClickListener(this);
         getCookList(intent.getLongExtra("classId", 1));
+
+        adapter=new QuickAdapter<CookItem>(this,R.layout.cook_list_item,null) {
+            @Override
+            protected void convert(BaseAdapterHelper helper, CookItem item) {
+                RequestCreator builer= Picasso.with(CookListActivity.this)
+                        .load(CookItem.BaseUrl+item.getImg())
+                        .resize(50,50).centerCrop().onlyScaleDown();
+
+                helper.setText(R.id.cook_name, item.getName())
+                        .setText(R.id.cook_food, item.getFood())
+                        .setImageBuilder(R.id.cook_img,builer);
+
+            }
+        };
     }
 
     private void getCookList(Long id) {
@@ -123,15 +133,20 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
     }
 
     private void updateCookListView(List<CookItem> cookItemList) {
-        QuickAdapter<CookItem> adapter=new QuickAdapter<CookItem>(this,R.layout.cook_list_item,cookItemList) {
-            @Override
-            protected void convert(BaseAdapterHelper helper, CookItem item) {
-                helper.setText(R.id.cook_name, item.getName())
-                        .setText(R.id.cook_food, item.getFood())
-                        .setImageUrl(R.id.cook_img,CookItem.BaseUrl+item.getImg());
-
-            }
-        };
+//        QuickAdapter<CookItem> adapter=new QuickAdapter<CookItem>(this,R.layout.cook_list_item,cookItemList) {
+//            @Override
+//            protected void convert(BaseAdapterHelper helper, CookItem item) {
+//                RequestCreator builer= Picasso.with(CookListActivity.this)
+//                        .load(CookItem.BaseUrl+item.getImg())
+//                        .resize(50,50).centerCrop().onlyScaleDown();
+//
+//                helper.setText(R.id.cook_name, item.getName())
+//                        .setText(R.id.cook_food, item.getFood())
+//                        .setImageBuilder(R.id.cook_img, builer);
+//
+//            }
+//        };
+        adapter.addAll(cookItemList);
         cookItemListView.setAdapter(adapter);
 
     }
@@ -153,8 +168,10 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         CookItem cookItem = (CookItem) parent.getItemAtPosition(position);
         Intent intent=new Intent(CookListActivity.this,CookDetailActivity.class);
-        intent.putExtra("title", cookItem.getName());
-        intent.putExtra("classId", cookItem.getId());
+        Bundle args=new Bundle();
+        args.putSerializable("List",(Serializable)cookItemList);
+        args.putInt("position", position);
+        intent.putExtras(args);
         startActivity(intent);
     }
 }

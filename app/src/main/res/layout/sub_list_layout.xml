@@ -3,10 +3,10 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFBB33">
-    <com.zt8989.cookapp.Utils.TitleLayout
+    <com.zt8989.cookapp.TitleLayout
         android:id="@+id/sub_title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"></com.zt8989.cookapp.Utils.TitleLayout>
+        android:layout_height="wrap_content"></com.zt8989.cookapp.TitleLayout>
     <ListView
         android:id="@+id/sub_list_view"
         android:layout_width="match_parent"
