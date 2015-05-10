@@ -3,18 +3,16 @@ package com.zt8989.cookapp.Model;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by Administrator on 2015/5/7.
  */
-public class CookItem implements Serializable{
-    private long id;
-    private String name;
+public class CookItem extends BaseCookItem{
     private String tag;
-    private String img;
     private String food;
+    private int count;
+
     public final static String BaseUrl = "http://www.yi18.net/";
 
     public String getFood() {
@@ -25,38 +23,12 @@ public class CookItem implements Serializable{
         this.food = food;
     }
 
-    private int count;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getTag() {
         return tag;
     }
 
     public void setTag(String tag) {
         this.tag = tag;
-    }
-
-    public String getImg() {
-        return img;
-    }
-
-    public void setImg(String img) {
-        this.img = img;
     }
 
     public int getCount() {

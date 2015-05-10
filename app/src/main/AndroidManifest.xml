@@ -23,6 +23,14 @@
         </activity>
         <activity android:name=".CookListActivity"></activity>
         <activity android:name=".CookDetailActivity"></activity>
+        <activity android:name=".SearchListActiviy">
+            <intent-filter>
+                <action android:name="com.zt8989.CookApp.ACTION_SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.zt8989.CookApp.RESULT" />
+                <category android:name="com.zt8989.CookApp.SEARCH" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

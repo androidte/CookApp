@@ -13,6 +13,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.common.base.Strings;
 import com.joanzapata.android.BaseAdapterHelper;
 import com.joanzapata.android.QuickAdapter;
 import com.zt8989.cookapp.DAL.DataAccess;
@@ -58,6 +59,8 @@ View.OnClickListener{
         clearBtn = (ImageView) findViewById(R.id.clear_btn);
         searchBtn = (ImageView) findViewById(R.id.search_btn);
         searchText = (EditText) findViewById(R.id.search_input);
+        clearBtn.setOnClickListener(this);
+        searchBtn.setOnClickListener(this);
 
         QuickAdapter<CookClass> adapter=new QuickAdapter<CookClass>(this,R.layout.grid_list_item,DataAccess.getCookClassList()) {
             @Override
@@ -106,8 +109,15 @@ View.OnClickListener{
                 break;
             case R.id.search_btn:
                 //TODO
-                Toast.makeText(this,"you search is" + searchText.getText().toString(),Toast.LENGTH_SHORT)
-                        .show();
+                String text = searchText.getText().toString().trim();
+                if (Strings.isNullOrEmpty(text) && text.length() < 2) {
+                    Toast.makeText(MainActivity.this,"Input error",Toast.LENGTH_SHORT).show();
+                }else {
+                    Intent intent=new Intent(SearchListActiviy.ACTION_SEARCH);
+                    intent.addCategory(SearchListActiviy.CATEGORY_RESULT);
+                    intent.putExtra(SearchListActiviy.KEYWORD, text);
+                    startActivity(intent);
+                }
                 break;
             default:
         }

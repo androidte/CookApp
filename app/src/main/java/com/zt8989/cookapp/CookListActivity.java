@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.common.collect.Lists;
 import com.joanzapata.android.BaseAdapterHelper;
 import com.joanzapata.android.QuickAdapter;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -25,7 +27,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -34,40 +35,18 @@ import java.util.Map;
  * Created by Administrator on 2015/5/7.
  */
 public class CookListActivity extends Activity implements AdapterView.OnItemClickListener{
-    public final static int PAGE = 1;
     public final static int LIMIT = 20;
-    public final static String TYPE = "id";
 
     private TitleLayout titleLayout;
     private ListView cookItemListView;
-    private List<CookItem> cookItemList;
+    private List<CookItem> list= Lists.newArrayList();
     private QuickAdapter<CookItem> adapter;
+    private boolean isFirst = true; /*是否第一次获取*/
+    private boolean lessThanLimit = false;
+    private int currentPage = 0;
+    private String type = "id";
+    private long id;
 
-    /**
-     * Called when the activity is starting.  This is where most initialization
-     * should go: calling {@link #setContentView(int)} to inflate the
-     * activity's UI, using {@link #findViewById} to programmatically interact
-     * with widgets in the UI, calling
-     * {@link #managedQuery(android.net.Uri, String[], String, String[], String)} to retrieve
-     * cursors for data being displayed, etc.
-     * <p/>
-     * <p>You can call {@link #finish} from within this function, in
-     * which case onDestroy() will be immediately called without any of the rest
-     * of the activity lifecycle ({@link #onStart}, {@link #onResume},
-     * {@link #onPause}, etc) executing.
-     * <p/>
-     * <p><em>Derived classes must call through to the super class's
-     * implementation of this method.  If they do not, an exception will be
-     * thrown.</em></p>
-     *
-     * @param savedInstanceState If the activity is being re-initialized after
-     *                           previously being shut down then this Bundle contains the data it most
-     *                           recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
-     * @see #onStart
-     * @see #onSaveInstanceState
-     * @see #onRestoreInstanceState
-     * @see #onPostCreate
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,12 +55,16 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
 
         cookItemListView = (ListView) findViewById(R.id.cook_list_view);
         titleLayout = (TitleLayout) findViewById(R.id.cook_title);
+        initView();
+    }
+
+    private void initView() {
         Intent intent = getIntent();
+        id = intent.getLongExtra("classId", 1);
         titleLayout.setText(intent.getStringExtra("title"));
         titleLayout.setBackgroundColor(0xFF669900);
-        cookItemListView.setOnItemClickListener(this);
-        getCookList(intent.getLongExtra("classId", 1));
 
+        cookItemListView.setOnItemClickListener(this);
         adapter=new QuickAdapter<CookItem>(this,R.layout.cook_list_item,null) {
             @Override
             protected void convert(BaseAdapterHelper helper, CookItem item) {
@@ -95,13 +78,34 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
 
             }
         };
+        adapter.showIndeterminateProgress(true);
+        cookItemListView.setAdapter(adapter);
+        cookItemListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (isFirst || lessThanLimit) {
+                    return;
+                }
+                if (view.getLastVisiblePosition() == totalItemCount - 1) {
+                    adapter.showIndeterminateProgress(true);
+                    getCookList();
+                }
+            }
+        });
+        getCookList();
     }
 
-    private void getCookList(Long id) {
+
+    private void getCookList() {
         Map<String,String> params=new Hashtable<>();
-        params.put("page", String.valueOf(PAGE));
+        params.put("page", String.valueOf(++currentPage));
         params.put("limit", String.valueOf(LIMIT));
-        params.put("type", String.valueOf(TYPE));
+        params.put("type", String.valueOf(type));
         params.put("id", String.valueOf(id));
 
         HttpUtils.get("list", new RequestParams(params), new JsonHttpResponseHandler() {
@@ -114,41 +118,51 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
                      */
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        cookItemList=new ArrayList<CookItem>();
                         try {
                             if (response.getBoolean("success")) {
                                 JSONArray objects = response.getJSONArray("yi18");
                                 for (int i = 0; i < objects.length(); i++) {
                                     CookItem item = JSONHelper.getCookItemFromJson(objects.getJSONObject(i));
-                                    cookItemList.add(item);
+                                    list.add(item);
                                 }
-                                updateCookListView(cookItemList);
+                                updateCookListView(list);
                             }
                         } catch (JSONException e) {
-                            Toast.makeText(CookListActivity.this, "get sub list error", Toast.LENGTH_SHORT).show();
+                            showToast("parse error");
                         }
                     }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                        showToast("network problem!");
+                    }
                 }
+
+
         );
     }
 
-    private void updateCookListView(List<CookItem> cookItemList) {
-//        QuickAdapter<CookItem> adapter=new QuickAdapter<CookItem>(this,R.layout.cook_list_item,cookItemList) {
-//            @Override
-//            protected void convert(BaseAdapterHelper helper, CookItem item) {
-//                RequestCreator builer= Picasso.with(CookListActivity.this)
-//                        .load(CookItem.BaseUrl+item.getImg())
-//                        .resize(50,50).centerCrop().onlyScaleDown();
-//
-//                helper.setText(R.id.cook_name, item.getName())
-//                        .setText(R.id.cook_food, item.getFood())
-//                        .setImageBuilder(R.id.cook_img, builer);
-//
-//            }
-//        };
-        adapter.addAll(cookItemList);
-        cookItemListView.setAdapter(adapter);
+    private void updateCookListView(List<CookItem> list) {
+        adapter.showIndeterminateProgress(false);
 
+        if (isFirst) {
+            isFirst = false;
+        }
+
+        if(list.size()<LIMIT) {
+            lessThanLimit = true;
+        }
+
+        if (list.size() < 0) {
+            showToast("empty list");
+            return;
+        }
+
+        adapter.addAll(list);
+    }
+
+    private void showToast(String text) {
+        Toast.makeText(CookListActivity.this, text, Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -166,10 +180,9 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
      */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        CookItem cookItem = (CookItem) parent.getItemAtPosition(position);
         Intent intent=new Intent(CookListActivity.this,CookDetailActivity.class);
         Bundle args=new Bundle();
-        args.putSerializable("List",(Serializable)cookItemList);
+        args.putSerializable("List",(Serializable) list);
         args.putInt("position", position);
         intent.putExtras(args);
         startActivity(intent);
