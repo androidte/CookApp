@@ -17,6 +17,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
+import com.zt8989.cookapp.DAL.MyQuickAdapter;
 import com.zt8989.cookapp.Model.CookItem;
 import com.zt8989.cookapp.Utils.HttpUtils;
 import com.zt8989.cookapp.Utils.JSONHelper;
@@ -39,13 +40,19 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
 
     private TitleLayout titleLayout;
     private ListView cookItemListView;
-    private List<CookItem> list= Lists.newArrayList();
-    private QuickAdapter<CookItem> adapter;
+    private MyQuickAdapter<CookItem> adapter;
     private boolean isFirst = true; /*是否第一次获取*/
     private boolean lessThanLimit = false;
     private int currentPage = 0;
     private String type = "id";
     private long id;
+
+    //定义获取状态
+    private final static int FIRSTLOADING = 0x00; //第一次加载
+    private final static int LOADING = 0x01; //第二次以后加载
+    private final static int COMPLETE = 0x02; //加载完成
+    private final static int NONE=0x03; //没有更多可以加载
+    private int state = FIRSTLOADING;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +72,8 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
         titleLayout.setBackgroundColor(0xFF669900);
 
         cookItemListView.setOnItemClickListener(this);
-        adapter=new QuickAdapter<CookItem>(this,R.layout.cook_list_item,null) {
+        adapter=new MyQuickAdapter<CookItem>(this,R.layout.cook_list_item) {
+
             @Override
             protected void convert(BaseAdapterHelper helper, CookItem item) {
                 RequestCreator builer= Picasso.with(CookListActivity.this)
@@ -88,10 +96,7 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (isFirst || lessThanLimit) {
-                    return;
-                }
-                if (view.getLastVisiblePosition() == totalItemCount - 1) {
+                if (state == COMPLETE && view.getLastVisiblePosition() == totalItemCount - 1) {
                     adapter.showIndeterminateProgress(true);
                     getCookList();
                 }
@@ -102,6 +107,7 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
 
 
     private void getCookList() {
+        state=LOADING;
         Map<String,String> params=new Hashtable<>();
         params.put("page", String.valueOf(++currentPage));
         params.put("limit", String.valueOf(LIMIT));
@@ -118,6 +124,7 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
                      */
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        List<CookItem> list = Lists.newArrayList();
                         try {
                             if (response.getBoolean("success")) {
                                 JSONArray objects = response.getJSONArray("yi18");
@@ -135,6 +142,7 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
                     @Override
                     public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                         showToast("network problem!");
+                        state = COMPLETE;
                     }
                 }
 
@@ -145,20 +153,19 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
     private void updateCookListView(List<CookItem> list) {
         adapter.showIndeterminateProgress(false);
 
-        if (isFirst) {
-            isFirst = false;
-        }
-
-        if(list.size()<LIMIT) {
-            lessThanLimit = true;
-        }
-
         if (list.size() < 0) {
             showToast("empty list");
             return;
         }
 
+        if (list.size() < 20) {
+            state = NONE;
+        } else {
+            state = COMPLETE;
+        }
+
         adapter.addAll(list);
+
     }
 
     private void showToast(String text) {
@@ -180,9 +187,10 @@ public class CookListActivity extends Activity implements AdapterView.OnItemClic
      */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
         Intent intent=new Intent(CookListActivity.this,CookDetailActivity.class);
         Bundle args=new Bundle();
-        args.putSerializable("List",(Serializable) list);
+        args.putSerializable("List",(Serializable)adapter.getData());
         args.putInt("position", position);
         intent.putExtras(args);
         startActivity(intent);
